@@ -1,0 +1,192 @@
+/* Base styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #c5daf9;
+  margin: 20px;
+  color: #000;
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.header {
+  font-size: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.header div {
+  min-width: 140px;
+}
+
+.overall-progress-container {
+  width: 150px;
+  height: 20px;
+  border: 1px solid #999;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.overall-progress-fill {
+  height: 100%;
+  background-color: #2da52a;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.overall-progress-label {
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  user-select: none;
+  min-width: 40px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background-color: #e0eafd;
+  font-size: 11px;
+}
+
+thead tr {
+  background-color: #081c8c;
+  color: white;
+  font-weight: bold;
+  font-size: 11px;
+  user-select: none;
+}
+
+thead tr:nth-child(2) {
+  background-color: #0b238f;
+}
+
+th,
+td {
+  border: 1px solid #a7bad9;
+  padding: 4px 6px;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+  padding-left: 6px;
+  white-space: normal;
+}
+
+tbody tr.task-group {
+  font-weight: bold;
+  background-color: #c3d0f7;
+}
+
+tbody tr.subtask td:first-child,
+tbody tr.subtask td:nth-child(2) {
+  text-align: left;
+  padding-left: 15px;
+  white-space: normal;
+}
+
+tbody tr.subsubtask td:first-child,
+tbody tr.subsubtask td:nth-child(2) {
+  padding-left: 35px;
+  white-space: normal;
+}
+
+td.progress-cell {
+  padding: 4px 3px;
+  white-space: nowrap;
+}
+
+.progress-bar {
+  background-color: #ccc;
+  border-radius: 2px;
+  overflow: hidden;
+  height: 16px;
+  width: 120px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #2da52a;
+  width: 0%;
+  transition: width 0.4s ease;
+  border-radius: 2px 0 0 2px;
+}
+
+.progress-text {
+  font-size: 10px;
+  font-weight: bold;
+  color: #000;
+  display: inline-block;
+  min-width: 25px;
+  vertical-align: middle;
+  user-select: none;
+}
+
+/* Delay coloring */
+td.delay-zero {
+  background-color: #d4edda;
+}
+
+td.delay-positive {
+  background-color: #f8d7da;
+}
+
+input,
+select {
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  padding: 2px 4px;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input.number-input {
+  width: 60px;
+  text-align: center;
+}
+
+input.text-input {
+  width: 98%;
+  white-space: normal;
+}
+
+button {
+  font-size: 10px;
+  padding: 2px 6px;
+  margin: 0 2px;
+  cursor: pointer;
+  border-radius: 3px;
+  border: 1px solid #555;
+  background-color: #007bff;
+  color: white;
+  user-select: none;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Table container for horizontal scroll on small screens */
+.table-container {
+  overflow-x: auto;
+}
