@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NIDO Project Manager Editable</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <h1>NIDO PROJECT MANAGER</h1>
+    <div
+      class="header"
+      role="contentinfo"
+      aria-label="Project manager contacts and overall progress"
+    >
+      <div><strong>Contact:</strong> Sanjay 9689767156</div>
+      <div><strong>Contact:</strong> Piyush 8108115884</div>
+      <div><strong>Overall Project Scale:</strong></div>
+      <div
+        class="overall-progress-container"
+        aria-label="Overall project completion progress bar"
+      >
+        <div id="overallProgressFill" class="overall-progress-fill"></div>
+      </div>
+      <div id="overallProgressLabel" class="overall-progress-label">0%</div>
+    </div>
+
+    <div class="table-container">
+      <table
+        id="projectTable"
+        role="grid"
+        aria-label="Project Management Tasks Table"
+      >
+        <thead>
+          <tr>
+            <th style="width: 5%">Sr. No.</th>
+            <th style="width: 25%">TASK TITLE</th>
+            <th style="width: 12%">TASK OWNER</th>
+            <th style="width: 15%">PROGRESS %</th>
+            <th style="width: 7%">PLANNED START DATE</th>
+            <th style="width: 7%">PLANNED DUE DATE</th>
+            <th style="width: 7%">PLANNED DURATION</th>
+            <th style="width: 7%">ACTUAL START DATE</th>
+            <th style="width: 7%">ACTUAL DUE DATE</th>
+            <th style="width: 7%">ACTUAL DURATION</th>
+            <th style="width: 7%">Delay</th>
+            <th style="width: 10%">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top: 15px">
+      <button onclick="addProjectGroup()">+ Add Project Group</button>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
