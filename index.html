@@ -16,7 +16,7 @@
         color: #081c8c;
       }
       .container {
-        max-width: 800px;
+        max-width: 1200px; /* Widen container for columns */
         margin: 0 auto;
         background: #fff;
         padding: 20px 30px;
@@ -27,7 +27,6 @@
         border-bottom: 2px solid #eee;
         padding-bottom: 10px;
       }
-      /* **** NEW STYLES for the form **** */
       .create-project {
         display: grid;
         gap: 15px;
@@ -49,10 +48,8 @@
         border: 1px solid #ccc;
         border-radius: 4px;
         width: 100%;
-        box-sizing: border-box; /* Fixes padding issue */
+        box-sizing: border-box;
       }
-      /* **** END NEW STYLES **** */
-
       #create-project-btn {
         padding: 12px 20px;
         font-size: 16px;
@@ -61,15 +58,41 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        justify-self: start; /* Aligns button to the left */
+        justify-self: start;
       }
       #create-project-btn:hover {
         background-color: #0056b3;
       }
+
+      /* **** NEW: Styles for Columnar Layout **** */
       #project-list {
+        display: grid;
+        /* Create columns that are at least 300px wide, 
+           and wrap automatically */
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 0;
+      }
+      .sorter-group {
+        background: #fdfdfd;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+      }
+      h3.sorter-group-title {
+        font-size: 1.2em;
+        color: #081c8c;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+        margin-top: 0;
+        margin-bottom: 15px;
+      }
+      ul.project-group-list {
         list-style: none;
         padding: 0;
       }
+      /* **** END NEW STYLES **** */
+
       #project-list li {
         display: flex;
         justify-content: space-between;
@@ -80,13 +103,12 @@
         margin-bottom: 10px;
         background: #f9f9f9;
       }
-      /* **** UPDATED STYLE to show Sorter Type **** */
       #project-list .project-info a {
         font-size: 18px;
         text-decoration: none;
         color: #0056b3;
         font-weight: bold;
-        display: block; /* Makes it stack */
+        display: block;
       }
       #project-list .project-info span {
         font-size: 14px;
@@ -132,46 +154,79 @@
 
         <button id="create-project-btn">Create Project</button>
       </div>
+
       <h2>Existing Projects</h2>
-      <ul id="project-list">
-        </ul>
+      <div id="project-list">
+        </div>
     </div>
 
     <script>
       const projectListEl = document.getElementById("project-list");
       const createBtn = document.getElementById("create-project-btn");
       const newProjectNameEl = document.getElementById("new-project-name");
-      const newProjectSorterEl = document.getElementById("new-project-sorter"); // Get the dropdown
+      const newProjectSorterEl = document.getElementById("new-project-sorter");
 
-      // Load all projects from storage
+      // **** UPDATED: This function now groups projects by sorter type ****
       function loadProjects() {
         const projects =
           JSON.parse(localStorage.getItem("NidoProjectList")) || [];
         projectListEl.innerHTML = ""; // Clear list
+
         if (projects.length === 0) {
           projectListEl.innerHTML = "<p>No projects created yet.</p>";
+          return;
         }
-        projects.forEach((project) => {
-          const li = document.createElement("li");
-          // **** UPDATED: Show Project Name and Sorter Type ****
-          li.innerHTML = `
-            <div class="project-info">
-              <a href="project.html?id=${project.id}">${project.name}</a>
-              <span>${project.sorterType}</span>
-            </div>
-            <button class="delete-project-btn" data-id="${project.id}">Delete</button>
-          `;
-          projectListEl.appendChild(li);
+
+        // Get all unique sorter types from the saved projects
+        const sorterTypes = [
+          ...new Set(projects.map((p) => p.sorterType)),
+        ].sort();
+
+        // Loop through each sorter type and create a column for it
+        sorterTypes.forEach((sorterType) => {
+          // 1. Create the wrapper for this column
+          const groupWrapper = document.createElement("div");
+          groupWrapper.className = "sorter-group";
+
+          // 2. Create the title (e.g., "NIDO 2:8 Sorter")
+          const heading = document.createElement("h3");
+          heading.className = "sorter-group-title";
+          heading.textContent = sorterType;
+          groupWrapper.appendChild(heading);
+
+          // 3. Create the list for this group's projects
+          const list = document.createElement("ul");
+          list.className = "project-group-list";
+
+          // 4. Get only projects that match this sorter type
+          const projectsForThisSorter = projects.filter(
+            (p) => p.sorterType === sorterType
+          );
+
+          // 5. Create and add each project <li>
+          projectsForThisSorter.forEach((project) => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+              <div class="project-info">
+                <a href="project.html?id=${project.id}">${project.name}</a>
+                <span>${project.sorterType}</span>
+              </div>
+              <button class="delete-project-btn" data-id="${project.id}">Delete</button>
+            `;
+            list.appendChild(li);
+          });
+
+          // 6. Add the list to the wrapper, and the wrapper to the main list
+          groupWrapper.appendChild(list);
+          projectListEl.appendChild(groupWrapper);
         });
       }
 
       // Create a new project
       createBtn.addEventListener("click", () => {
-        // **** UPDATED: Get data from both fields ****
         const sorterType = newProjectSorterEl.value;
         const projectName = newProjectNameEl.value.trim();
 
-        // **** UPDATED: Validate both fields ****
         if (sorterType === "") {
           alert("Please select a sorter type.");
           return;
@@ -184,17 +239,14 @@
         const projects =
           JSON.parse(localStorage.getItem("NidoProjectList")) || [];
         
-        // **** UPDATED: New project object structure ****
         const newProject = {
-          id: "pid_" + new Date().getTime(), // Unique ID
+          id: "pid_" + new Date().getTime(),
           name: projectName,
-          sorterType: sorterType, // Add the sorter type
+          sorterType: sorterType,
         };
 
         projects.push(newProject);
         localStorage.setItem("NidoProjectList", JSON.stringify(projects));
-
-        // Go to the new project page
         window.location.href = `project.html?id=${newProject.id}`;
       });
 
@@ -209,7 +261,7 @@
           projects = projects.filter((p) => p.id !== projectId);
 
           localStorage.setItem("NidoProjectList", JSON.stringify(projects));
-          localStorage.removeItem(`NidoProjectData-${projectId}`); // Delete project data
+          localStorage.removeItem(`NidoProjectData-${projectId}`);
 
           loadProjects(); // Reload list
         }
