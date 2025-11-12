@@ -205,6 +205,26 @@ button:hover {
   background-color: #0056b3;
 }
 
+/* **** NEW STYLE for toggle button **** */
+button.toggle-btn {
+  font-size: 10px;
+  padding: 0px 4px;
+  margin-right: 5px;
+  cursor: pointer;
+  border-radius: 3px;
+  border: 1px solid #555;
+  background-color: #f0f0f0;
+  color: #333;
+  user-select: none;
+  font-weight: bold;
+  width: 18px; /* Fixed width */
+  text-align: center;
+}
+
+button.toggle-btn:hover {
+  background-color: #ddd;
+}
+
 /* Table container for horizontal scroll on small screens */
 .table-container {
   overflow-x: auto;
