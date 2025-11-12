@@ -145,8 +145,7 @@ function renderRow(item, level = 0, parentIndex = null) {
       }" data-prop="owner" data-id="${item.id}" /></td>
       
       <td class="progress-cell">
-        <span class="progress-text">${progressPercent}%</span>
-        <input type="number" class="number-input" style="width: 50px; display: none;" value="${progressPercent}" data-prop="progress" data-id="${
+        <input type="number" class="number-input" value="${progressPercent}" data-prop="progress" data-id="${
     item.id
   }" />
         <div class="progress-bar" aria-hidden="true" title="${progressPercent}%">
@@ -185,31 +184,8 @@ function renderRow(item, level = 0, parentIndex = null) {
       </td>
     `;
 
-  // Add click-to-edit for progress
-  const progressCell = tr.querySelector(".progress-cell");
-  const progressText = progressCell.querySelector(".progress-text");
-  const progressInput = progressCell.querySelector(".number-input");
-  const progressBar = progressCell.querySelector(".progress-bar");
-
-  progressCell.addEventListener("click", () => {
-    progressText.style.display = "none";
-    progressBar.style.display = "none";
-    progressInput.style.display = "inline-block";
-    progressInput.focus();
-    progressInput.select();
-  });
-
-  progressInput.addEventListener("blur", () => {
-    progressText.style.display = "inline-block";
-    progressBar.style.display = "inline-block";
-    progressInput.style.display = "none";
-  });
-
-  progressInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      progressInput.blur();
-    }
-  });
+  // CHANGE: Removed all click-to-edit event listeners for the progress cell.
+  // The input is now always visible.
 
   return tr;
 }
@@ -248,7 +224,7 @@ function findById(id) {
   return null;
 }
 
-// Update overall progress (average of all subtasks)
+// Update overall progress (average of all tasks)
 function updateOverallProgress() {
   let totalProgress = 0;
   let count = 0;
@@ -266,12 +242,11 @@ function updateOverallProgress() {
     }
   });
   const overallPercent = count ? Math.round(totalProgress / count) : 0;
-  
+
   // Cap the visual bar at 100%
   const barWidth = Math.min(overallPercent, 100);
-  
-  document.getElementById("overallProgressFill").style.width =
-    barWidth + "%";
+
+  document.getElementById("overallProgressFill").style.width = barWidth + "%";
   document.getElementById("overallProgressLabel").textContent =
     overallPercent + "%";
 }
@@ -285,49 +260,49 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
   const found = findById(id);
   if (!found) return;
 
-  let val = el.value.trim();
+  // CHANGE: Split logic for progress vs other fields
+  // to prevent trimming numbers and to stop re-rendering.
 
-  // Validation and type conversion for specific props
   if (prop === "progress") {
-    val = Number(val);
-    // 3. Validation for 100 limit is REMOVED
-    // if (val < 0) val = 0;
-    // else if (val > 100) val = 100;
-    el.value = val;
-  }
+    let val = el.value; // Get raw value
+    let numVal = Number(val);
+    if (val === "") numVal = 0; // Treat empty string as 0
+    if (isNaN(numVal)) numVal = found.obj[prop] || 0; // Keep old value if invalid
+    if (numVal < 0) numVal = 0;
 
-  if (
-    prop === "plannedStart" ||
-    prop === "plannedDue" ||
-    prop === "actualStart" ||
-    prop === "actualDue"
-  ) {
-    // Dates as M/D/YY format internally
-    val = formatDisplayDate(val);
-  }
+    found.obj[prop] = numVal; // Update data
 
-  found.obj[prop] = val;
-
-  // Recalculate durations and delay if dates changed
-  if (
-    ["plannedStart", "plannedDue", "actualStart", "actualDue"].includes(prop)
-  ) {
-    recalcDurations(found.obj);
-  }
-  
-  // Re-render only on date changes or if the input isn't a progress bar
-  // This prevents the progress input from losing focus
-  if (prop !== "progress") {
-     renderTable();
+    // Update visual bar
+    const barEl = el.closest("td").querySelector(".progress-bar-fill");
+    if (barEl) {
+      const barWidth = Math.min(numVal, 100);
+      barEl.style.width = barWidth + "%";
+      barEl.closest(".progress-bar").title = numVal + "%";
+    }
+    updateOverallProgress();
+    // CRITICAL: Do NOT call renderTable() here.
+    // CRITICAL: Do NOT set el.value. Let the user type.
   } else {
-     // If progress changed, just update the overall bar
-     updateOverallProgress();
-     // Update the text in the cell
-     const textEl = el.closest('td').querySelector('.progress-text');
-     if (textEl) textEl.textContent = val + "%";
-     // Update the visual bar
-     const barEl = el.closest('td').querySelector('.progress-bar-fill');
-     if (barEl) barEl.style.width = Math.min(val, 100) + '%';
+    // This is for all other fields
+    let val = el.value.trim();
+
+    if (
+      prop === "plannedStart" ||
+      prop === "plannedDue" ||
+      prop === "actualStart" ||
+      prop === "actualDue"
+    ) {
+      val = formatDisplayDate(val);
+    }
+
+    found.obj[prop] = val; // Update data
+
+    if (
+      ["plannedStart", "plannedDue", "actualStart", "actualDue"].includes(prop)
+    ) {
+      recalcDurations(found.obj);
+    }
+    renderTable(); // Re-render table
   }
 });
 
@@ -437,7 +412,7 @@ function getNextSubtaskNumber(group) {
 
   // If numeric subtask numbers, increment maxN
   if (maxN > 0) return `${group.num}.${maxN + 1}`;
-  
+
   // If only non-numeric suffixes or no suffixes, start with .1
   if (suffixes.length === 0 && maxN === 0) return group.num + ".1";
 
