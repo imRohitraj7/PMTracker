@@ -13,14 +13,14 @@ let data = [
     actualDue: "03/20/23",
     actualDuration: 1,
     delay: 0,
-    isCollapsed: false, // **** NEW ****
+    isCollapsed: false,
     subtasks: [
       {
         id: generateId(),
         num: "1.1",
         title: "Capture all the verticals and tasks in the project plan",
         owner: "Rohit",
-        progress: 50,
+        progress: 5,
         plannedStart: "06/07/23",
         plannedDue: "06/07/23",
         plannedDuration: 1,
@@ -34,7 +34,7 @@ let data = [
         num: "1.2",
         title: "Assign due dates for all A4 tasks",
         owner: "Rohit",
-        progress: 50,
+        progress: 5,
         plannedStart: "06/07/23",
         plannedDue: "06/07/23",
         plannedDuration: 1,
@@ -50,7 +50,7 @@ let data = [
     num: "2",
     title: "Project Facility Readiness",
     owner: "Various",
-    progress: 100,
+    progress: 0,
     plannedStart: "06/15/23",
     plannedDue: "06/22/23",
     plannedDuration: 8,
@@ -58,7 +58,7 @@ let data = [
     actualDue: "06/22/23",
     actualDuration: 8,
     delay: 0,
-    isCollapsed: false, // **** NEW ****
+    isCollapsed: false,
     subtasks: [],
   },
 ];
@@ -222,7 +222,6 @@ function renderTable() {
     // Render group row
     tbody.appendChild(renderRow(group, 0));
 
-    // **** CHANGED: Check isCollapsed flag before rendering subtasks ****
     if (group.subtasks && !group.isCollapsed) {
       group.subtasks.forEach((task) => {
         recalcDurations(task);
@@ -249,7 +248,10 @@ function findById(id) {
 // Updated logic to average groups
 function updateOverallProgress() {
   if (data.length === 0) {
-    document.getElementById("overallProgressFill").style.width = "0%";
+    // **** CHANGE: Added !important ****
+    document
+      .getElementById("overallProgressFill")
+      .style.setProperty("width", "0%", "important");
     document.getElementById("overallProgressLabel").textContent = "0%";
     return;
   }
@@ -262,7 +264,11 @@ function updateOverallProgress() {
   const overallPercent = Math.round(totalProgress / data.length);
   const barWidth = Math.min(overallPercent, 100);
 
-  document.getElementById("overallProgressFill").style.width = barWidth + "%";
+  // **** CHANGE: Switched to setProperty and added !important ****
+  document
+    .getElementById("overallProgressFill")
+    .style.setProperty("width", barWidth + "%", "important");
+
   document.getElementById("overallProgressLabel").textContent =
     overallPercent + "%";
 }
@@ -364,7 +370,6 @@ document.getElementById("tableBody").addEventListener("change", (e) => {
 document.getElementById("tableBody").addEventListener("click", (e) => {
   const btn = e.target;
 
-  // **** NEW: Toggle button handler ****
   if (btn.classList.contains("toggle-btn")) {
     const id = btn.dataset.id;
     const group = data.find((g) => g.id === id);
@@ -439,7 +444,7 @@ function addProjectGroup() {
     actualDue: "",
     actualDuration: 0,
     delay: 0,
-    isCollapsed: false, // **** NEW ****
+    isCollapsed: false,
     subtasks: [],
   };
   data.push(newGroup);
