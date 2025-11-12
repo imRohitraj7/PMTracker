@@ -128,11 +128,21 @@ function renderRow(item, level = 0, parentIndex = null) {
   const delayClass = item.delay > 0 ? "delay-positive" : "delay-zero";
 
   tr.innerHTML = `
-      <td><input class="text-input" value="${item.num}" style="width: 80px; font-weight:bold;" data-prop="num" data-id="${item.id}" /></td>
-      <td><input class="text-input" value="${item.title}" style="${indentStyle}" data-prop="title" data-id="${item.id}" /></td>
-      <td><input class="text-input" value="${item.owner}" data-prop="owner" data-id="${item.id}" /></td>
+      <td><input class="text-input" value="${
+        item.num
+      }" style="width: 80px; font-weight:bold;" data-prop="num" data-id="${
+    item.id
+  }" /></td>
+      <td><input class="text-input" value="${
+        item.title
+      }" style="${indentStyle}" data-prop="title" data-id="${item.id}" /></td>
+      <td><input class="text-input" value="${
+        item.owner
+      }" data-prop="owner" data-id="${item.id}" /></td>
       <td class="progress-cell">
-        <input type="number" class="number-input" min="0" max="100" value="${item.progress}" data-prop="progress" data-id="${item.id}" />
+        <input type="number" class="number-input" value="${
+          item.progress
+        }" data-prop="progress" data-id="${item.id}" />
         <div class="progress-bar" aria-hidden="true" title="${item.progress}%">
           <div class="progress-bar-fill" style="width: ${item.progress}%;"></div>
         </div>
@@ -236,8 +246,9 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
   // Validation and type conversion for specific props
   if (prop === "progress") {
     val = Number(val);
-    if (val < 0) val = 0;
-    else if (val > 100) val = 100;
+    // CHANGE 3.2: Removed the validation that capped the value at 100
+    // if (val < 0) val = 0;
+    // else if (val > 100) val = 100;
     el.value = val;
   }
 
