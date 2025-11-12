@@ -127,6 +127,10 @@ function renderRow(item, level = 0, parentIndex = null) {
 
   const delayClass = item.delay > 0 ? "delay-positive" : "delay-zero";
 
+  // Use progress value for text, but cap the visual bar at 100%
+  const progressPercent = Number(item.progress) || 0;
+  const barWidth = Math.min(progressPercent, 100);
+
   tr.innerHTML = `
       <td><input class="text-input" value="${
         item.num
@@ -139,14 +143,17 @@ function renderRow(item, level = 0, parentIndex = null) {
       <td><input class="text-input" value="${
         item.owner
       }" data-prop="owner" data-id="${item.id}" /></td>
+      
       <td class="progress-cell">
-        <input type="number" class="number-input" value="${
-          item.progress
-        }" data-prop="progress" data-id="${item.id}" />
-        <div class="progress-bar" aria-hidden="true" title="${item.progress}%">
-          <div class="progress-bar-fill" style="width: ${item.progress}%;"></div>
+        <span class="progress-text">${progressPercent}%</span>
+        <input type="number" class="number-input" style="width: 50px; display: none;" value="${progressPercent}" data-prop="progress" data-id="${
+    item.id
+  }" />
+        <div class="progress-bar" aria-hidden="true" title="${progressPercent}%">
+          <div class="progress-bar-fill" style="width: ${barWidth}%;"></div>
         </div>
       </td>
+      
       <td><input type="date" value="${formatInputDate(
         item.plannedStart
       )}" data-prop="plannedStart" data-id="${item.id}" /></td>
@@ -177,6 +184,32 @@ function renderRow(item, level = 0, parentIndex = null) {
         <button class="delete-btn" data-id="${item.id}">Delete</button>
       </td>
     `;
+
+  // Add click-to-edit for progress
+  const progressCell = tr.querySelector(".progress-cell");
+  const progressText = progressCell.querySelector(".progress-text");
+  const progressInput = progressCell.querySelector(".number-input");
+  const progressBar = progressCell.querySelector(".progress-bar");
+
+  progressCell.addEventListener("click", () => {
+    progressText.style.display = "none";
+    progressBar.style.display = "none";
+    progressInput.style.display = "inline-block";
+    progressInput.focus();
+    progressInput.select();
+  });
+
+  progressInput.addEventListener("blur", () => {
+    progressText.style.display = "inline-block";
+    progressBar.style.display = "inline-block";
+    progressInput.style.display = "none";
+  });
+
+  progressInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      progressInput.blur();
+    }
+  });
 
   return tr;
 }
@@ -220,14 +253,25 @@ function updateOverallProgress() {
   let totalProgress = 0;
   let count = 0;
   data.forEach((group) => {
-    group.subtasks.forEach((task) => {
-      totalProgress += Number(task.progress);
+    // Only count subtasks for overall progress
+    if (group.subtasks && group.subtasks.length > 0) {
+      group.subtasks.forEach((task) => {
+        totalProgress += Number(task.progress);
+        count++;
+      });
+    } else {
+      // If a group has no subtasks, count the group itself
+      totalProgress += Number(group.progress);
       count++;
-    });
+    }
   });
   const overallPercent = count ? Math.round(totalProgress / count) : 0;
+  
+  // Cap the visual bar at 100%
+  const barWidth = Math.min(overallPercent, 100);
+  
   document.getElementById("overallProgressFill").style.width =
-    overallPercent + "%";
+    barWidth + "%";
   document.getElementById("overallProgressLabel").textContent =
     overallPercent + "%";
 }
@@ -246,7 +290,7 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
   // Validation and type conversion for specific props
   if (prop === "progress") {
     val = Number(val);
-    // CHANGE 3.2: Removed the validation that capped the value at 100
+    // 3. Validation for 100 limit is REMOVED
     // if (val < 0) val = 0;
     // else if (val > 100) val = 100;
     el.value = val;
@@ -270,8 +314,21 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
   ) {
     recalcDurations(found.obj);
   }
-
-  renderTable();
+  
+  // Re-render only on date changes or if the input isn't a progress bar
+  // This prevents the progress input from losing focus
+  if (prop !== "progress") {
+     renderTable();
+  } else {
+     // If progress changed, just update the overall bar
+     updateOverallProgress();
+     // Update the text in the cell
+     const textEl = el.closest('td').querySelector('.progress-text');
+     if (textEl) textEl.textContent = val + "%";
+     // Update the visual bar
+     const barEl = el.closest('td').querySelector('.progress-bar-fill');
+     if (barEl) barEl.style.width = Math.min(val, 100) + '%';
+  }
 });
 
 document.getElementById("tableBody").addEventListener("click", (e) => {
@@ -369,7 +426,7 @@ function getNextSubtaskNumber(group) {
     if (subNum.startsWith(group.num + ".")) {
       let remainder = subNum.substring(group.num.length + 1);
       // Check if numeric or letter suffix
-      if (!isNaN(remainder)) {
+      if (!isNaN(remainder) && remainder !== "") {
         let n = parseInt(remainder);
         if (n > maxN) maxN = n;
       } else {
@@ -380,6 +437,9 @@ function getNextSubtaskNumber(group) {
 
   // If numeric subtask numbers, increment maxN
   if (maxN > 0) return `${group.num}.${maxN + 1}`;
+  
+  // If only non-numeric suffixes or no suffixes, start with .1
+  if (suffixes.length === 0 && maxN === 0) return group.num + ".1";
 
   // Otherwise try alphabetic suffix (a,b,c,...)
   if (suffixes.length === 0) return group.num + ".a";
