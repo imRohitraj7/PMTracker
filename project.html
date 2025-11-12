@@ -34,6 +34,23 @@
         min-width: 140px;
       }
 
+      /* **** NEW STYLE FOR BACK BUTTON **** */
+      .back-button {
+        font-size: 10px;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 3px;
+        background-color: #007bff;
+        color: white;
+        user-select: none;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .back-button:hover {
+        background-color: #0056b3;
+      }
+      /* **** END NEW STYLE **** */
+
       .overall-progress-container {
         width: 150px;
         height: 18px;
@@ -221,17 +238,8 @@
       role="contentinfo"
       aria-label="Project manager contacts and overall progress"
     >
-      <a
-        href="index.html"
-        style="
-          background: #081c8c;
-          color: white;
-          padding: 5px 10px;
-          border-radius: 4px;
-          text-decoration: none;
-        "
-        >&laquo; Back to Dashboard</a
-      >
+      <a href="index.html" class="back-button">&laquo; Back to Dashboard</a>
+
       <div><strong>Overall Project Scale:</strong></div>
       <div
         class="overall-progress-container"
@@ -650,6 +658,33 @@
         });
         return `${group.num}.${maxN + 1}`;
       }
+
+      // --- **** NEW: Save Title on Edit **** ---
+      document
+        .getElementById("project-title")
+        .addEventListener("blur", () => {
+          const newTitle = document
+            .getElementById("project-title")
+            .textContent.trim();
+          if (!newTitle) {
+            // Don't allow blank title
+            loadProject(); // Revert to old name
+            return;
+          }
+
+          // Get the project list
+          const projects =
+            JSON.parse(localStorage.getItem("NidoProjectList")) || [];
+          const project = projects.find((p) => p.id === projectId);
+
+          if (project && project.name !== newTitle) {
+            project.name = newTitle;
+            // Save the updated project list
+            localStorage.setItem("NidoProjectList", JSON.stringify(projects));
+            // Update the browser tab title
+            document.title = newTitle;
+          }
+        });
 
       // --- Initial Page Load ---
       loadProject();
