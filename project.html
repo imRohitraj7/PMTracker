@@ -20,6 +20,15 @@
         font-size: 16px;
         margin-bottom: 6px;
       }
+      
+      /* **** NEW: Style for the Sorter Type Subtitle **** */
+      #project-sorter-type {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+        margin-top: -5px;
+        margin-bottom: 15px;
+      }
 
       .header {
         font-size: 11px;
@@ -34,7 +43,6 @@
         min-width: 140px;
       }
 
-      /* **** NEW STYLE FOR BACK BUTTON **** */
       .back-button {
         font-size: 10px;
         padding: 5px 10px;
@@ -49,7 +57,6 @@
       .back-button:hover {
         background-color: #0056b3;
       }
-      /* **** END NEW STYLE **** */
 
       .overall-progress-container {
         width: 150px;
@@ -62,7 +69,6 @@
         display: inline-block;
       }
 
-      /* This is the class that has the fix */
       .overall-progress-fill {
         height: 100%;
         background-color: #2da52a;
@@ -232,6 +238,7 @@
 
   <body>
     <h1 id="project-title" contenteditable="true">Loading Project...</h1>
+    <h2 id="project-sorter-type"></h2>
 
     <div
       class="header"
@@ -315,6 +322,10 @@
           // 3. Set the page title
           document.getElementById("project-title").textContent = project.name;
           document.title = project.name; // Set browser tab title
+          
+          // **** NEW: Set the sorter type subtitle ****
+          document.getElementById("project-sorter-type").textContent = project.sorterType;
+
         } else {
           alert("Project not found. Redirecting to dashboard.");
           window.location.href = "index.html";
@@ -475,7 +486,6 @@
       }
 
       function updateOverallProgress() {
-        // This targets the ID and class from this file, which fixes the bug.
         const fillElement = document.getElementById("overall-progress-fill");
         const labelElement = document.getElementById("overallProgressLabel");
 
@@ -659,7 +669,7 @@
         return `${group.num}.${maxN + 1}`;
       }
 
-      // --- **** NEW: Save Title on Edit **** ---
+      // --- Save Title on Edit ---
       document
         .getElementById("project-title")
         .addEventListener("blur", () => {
