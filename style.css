@@ -2,19 +2,19 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #c5daf9;
-  margin: 15px; /* Reduced margin */
+  margin: 15px;
   color: #000;
-  font-size: 10px; /* CHANGE: Reduced base font size */
+  font-size: 10px;
 }
 
 h1 {
   font-weight: bold;
-  font-size: 16px; /* CHANGE: Reduced font size */
+  font-size: 16px;
   margin-bottom: 6px;
 }
 
 .header {
-  font-size: 11px; /* CHANGE: Reduced font size */
+  font-size: 11px;
   margin-bottom: 12px;
   display: flex;
   gap: 15px;
@@ -28,7 +28,7 @@ h1 {
 
 .overall-progress-container {
   width: 150px;
-  height: 18px; /* CHANGE: Reduced height */
+  height: 18px;
   border: 1px solid #999;
   background: white;
   border-radius: 4px;
@@ -37,17 +37,18 @@ h1 {
   display: inline-block;
 }
 
-.overall-progress-fill {
+/* **** CHANGED: Renamed class to break cache **** */
+.overall-bar-fill {
   height: 100%;
   background-color: #2da52a;
-  width: 0%; /* <-- ***** THIS IS THE CRITICAL FIX ***** */
+  width: 0%; /* Start at 0% */
   transition: width 0.5s ease;
 }
 
 .overall-progress-label {
   font-weight: bold;
-  font-size: 12px; /* CHANGE: Reduced font size */
-  line-height: 18px; /* CHANGE: Matched height */
+  font-size: 12px;
+  line-height: 18px;
   text-align: center;
   user-select: none;
   min-width: 40px;
@@ -57,14 +58,14 @@ table {
   border-collapse: collapse;
   width: 100%;
   background-color: #e0eafd;
-  font-size: 10px; /* CHANGE: Reduced font size */
+  font-size: 10px;
 }
 
 thead tr {
   background-color: #081c8c;
   color: white;
   font-weight: bold;
-  font-size: 10px; /* CHANGE: Reduced font size */
+  font-size: 10px;
   user-select: none;
 }
 
@@ -75,13 +76,12 @@ thead tr:nth-child(2) {
 th,
 td {
   border: 1px solid #a7bad9;
-  padding: 3px 5px; /* CHANGE: Reduced padding */
+  padding: 3px 5px;
   text-align: center;
   vertical-align: middle;
   white-space: nowrap;
 }
 
-/* CHANGE: Allow Task Title (col 1 & 2) to wrap */
 th:first-child,
 td:first-child,
 th:nth-child(2),
@@ -110,7 +110,6 @@ tbody tr.subsubtask td:nth-child(2) {
   white-space: normal;
 }
 
-/* CHANGE: Make progress cell flexible */
 td.progress-cell {
   padding: 2px 3px;
   white-space: nowrap;
@@ -123,8 +122,8 @@ td.progress-cell {
   background-color: #ccc;
   border-radius: 2px;
   overflow: hidden;
-  height: 14px; /* CHANGE: Reduced height */
-  flex-grow: 1; /* CHANGE: Fills available space */
+  height: 14px;
+  flex-grow: 1;
   vertical-align: middle;
   position: relative;
 }
@@ -156,7 +155,6 @@ td.delay-positive {
   background-color: #f8d7da;
 }
 
-/* CHANGE: Added textarea to this main rule */
 input,
 select,
 textarea {
@@ -175,17 +173,15 @@ input.number-input {
   flex-shrink: 0;
 }
 
-/* CHANGE: Added textarea.text-input to this rule */
 input.text-input,
 textarea.text-input {
   width: 98%;
-  white-space: normal; /* This will now apply to the textarea */
+  white-space: normal;
 }
 
-/* CHANGE: Added new rule for textarea specifics */
 textarea.text-input {
-  resize: vertical; /* Allow user to resize it vertically */
-  min-height: 18px; /* Match the height of other inputs */
+  resize: vertical;
+  min-height: 18px;
   vertical-align: middle;
 }
 
@@ -205,7 +201,6 @@ button:hover {
   background-color: #0056b3;
 }
 
-/* **** NEW STYLE for toggle button **** */
 button.toggle-btn {
   font-size: 10px;
   padding: 0px 4px;
@@ -217,7 +212,7 @@ button.toggle-btn {
   color: #333;
   user-select: none;
   font-weight: bold;
-  width: 18px; /* Fixed width */
+  width: 18px;
   text-align: center;
 }
 
@@ -225,7 +220,6 @@ button.toggle-btn:hover {
   background-color: #ddd;
 }
 
-/* Table container for horizontal scroll on small screens */
 .table-container {
   overflow-x: auto;
 }
