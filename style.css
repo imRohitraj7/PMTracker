@@ -2,18 +2,19 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #c5daf9;
-  margin: 20px;
+  margin: 15px; /* Reduced margin */
   color: #000;
+  font-size: 10px; /* CHANGE: Reduced base font size */
 }
 
 h1 {
   font-weight: bold;
-  font-size: 18px;
+  font-size: 16px; /* CHANGE: Reduced font size */
   margin-bottom: 6px;
 }
 
 .header {
-  font-size: 12px;
+  font-size: 11px; /* CHANGE: Reduced font size */
   margin-bottom: 12px;
   display: flex;
   gap: 15px;
@@ -27,7 +28,7 @@ h1 {
 
 .overall-progress-container {
   width: 150px;
-  height: 20px;
+  height: 18px; /* CHANGE: Reduced height */
   border: 1px solid #999;
   background: white;
   border-radius: 4px;
@@ -45,8 +46,8 @@ h1 {
 
 .overall-progress-label {
   font-weight: bold;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: 12px; /* CHANGE: Reduced font size */
+  line-height: 18px; /* CHANGE: Matched height */
   text-align: center;
   user-select: none;
   min-width: 40px;
@@ -56,14 +57,14 @@ table {
   border-collapse: collapse;
   width: 100%;
   background-color: #e0eafd;
-  font-size: 11px;
+  font-size: 10px; /* CHANGE: Reduced font size */
 }
 
 thead tr {
   background-color: #081c8c;
   color: white;
   font-weight: bold;
-  font-size: 11px;
+  font-size: 10px; /* CHANGE: Reduced font size */
   user-select: none;
 }
 
@@ -74,17 +75,21 @@ thead tr:nth-child(2) {
 th,
 td {
   border: 1px solid #a7bad9;
-  padding: 4px 6px;
+  padding: 3px 5px; /* CHANGE: Reduced padding */
   text-align: center;
   vertical-align: middle;
   white-space: nowrap;
 }
 
+/* CHANGE: Allow Task Title (col 1 & 2) to wrap */
 th:first-child,
-td:first-child {
+td:first-child,
+th:nth-child(2),
+td:nth-child(2) {
   text-align: left;
   padding-left: 6px;
   white-space: normal;
+  word-break: break-word;
 }
 
 tbody tr.task-group {
@@ -105,20 +110,22 @@ tbody tr.subsubtask td:nth-child(2) {
   white-space: normal;
 }
 
+/* CHANGE: Make progress cell flexible */
 td.progress-cell {
-  padding: 4px 3px;
+  padding: 2px 3px;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .progress-bar {
   background-color: #ccc;
   border-radius: 2px;
   overflow: hidden;
-  height: 16px;
-  width: 120px;
-  display: inline-block;
+  height: 14px; /* CHANGE: Reduced height */
+  flex-grow: 1; /* CHANGE: Fills available space */
   vertical-align: middle;
-  margin-left: 6px;
   position: relative;
 }
 
@@ -130,6 +137,7 @@ td.progress-cell {
   border-radius: 2px 0 0 2px;
 }
 
+/* This class is no longer used by the script */
 .progress-text {
   font-size: 10px;
   font-weight: bold;
@@ -152,7 +160,7 @@ td.delay-positive {
 input,
 select {
   font-family: Arial, sans-serif;
-  font-size: 11px;
+  font-size: 10px; /* CHANGE: Reduced font size */
   padding: 2px 4px;
   border: 1px solid #aaa;
   border-radius: 3px;
@@ -161,8 +169,9 @@ select {
 }
 
 input.number-input {
-  width: 60px;
+  width: 50px; /* CHANGE: Reduced width */
   text-align: center;
+  flex-shrink: 0; /* Prevents shrinking in flex container */
 }
 
 input.text-input {
@@ -171,7 +180,7 @@ input.text-input {
 }
 
 button {
-  font-size: 10px;
+  font-size: 10px; /* CHANGE: Reduced font size */
   padding: 2px 6px;
   margin: 0 2px;
   cursor: pointer;
