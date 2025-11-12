@@ -247,12 +247,13 @@ function findById(id) {
 
 // Updated logic to average groups
 function updateOverallProgress() {
+  // **** CHANGED: Using new ID ****
+  const fillElement = document.getElementById("overall-bar-fill-element");
+  const labelElement = document.getElementById("overallProgressLabel");
+
   if (data.length === 0) {
-    // **** CHANGE: Added !important ****
-    document
-      .getElementById("overallProgressFill")
-      .style.setProperty("width", "0%", "important");
-    document.getElementById("overallProgressLabel").textContent = "0%";
+    fillElement.style.width = "0%";
+    labelElement.textContent = "0%";
     return;
   }
 
@@ -264,13 +265,9 @@ function updateOverallProgress() {
   const overallPercent = Math.round(totalProgress / data.length);
   const barWidth = Math.min(overallPercent, 100);
 
-  // **** CHANGE: Switched to setProperty and added !important ****
-  document
-    .getElementById("overallProgressFill")
-    .style.setProperty("width", barWidth + "%", "important");
-
-  document.getElementById("overallProgressLabel").textContent =
-    overallPercent + "%";
+  // **** CHANGED: Using new ID and simple .style.width ****
+  fillElement.style.width = barWidth + "%";
+  labelElement.textContent = overallPercent + "%";
 }
 
 // Event delegation for edits and buttons
