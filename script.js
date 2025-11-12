@@ -137,9 +137,11 @@ function renderRow(item, level = 0, parentIndex = null) {
       }" style="width: 80px; font-weight:bold;" data-prop="num" data-id="${
     item.id
   }" /></td>
-      <td><input class="text-input" value="${
-        item.title
-      }" style="${indentStyle}" data-prop="title" data-id="${item.id}" /></td>
+      
+      <td><textarea class="text-input" style="${indentStyle}" data-prop="title" data-id="${
+    item.id
+  }">${item.title}</textarea></td>
+      
       <td><input class="text-input" value="${
         item.owner
       }" data-prop="owner" data-id="${item.id}" /></td>
@@ -183,9 +185,6 @@ function renderRow(item, level = 0, parentIndex = null) {
         <button class="delete-btn" data-id="${item.id}">Delete</button>
       </td>
     `;
-
-  // CHANGE: Removed all click-to-edit event listeners for the progress cell.
-  // The input is now always visible.
 
   return tr;
 }
@@ -260,9 +259,6 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
   const found = findById(id);
   if (!found) return;
 
-  // CHANGE: Split logic for progress vs other fields
-  // to prevent trimming numbers and to stop re-rendering.
-
   if (prop === "progress") {
     let val = el.value; // Get raw value
     let numVal = Number(val);
@@ -280,10 +276,9 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
       barEl.closest(".progress-bar").title = numVal + "%";
     }
     updateOverallProgress();
-    // CRITICAL: Do NOT call renderTable() here.
-    // CRITICAL: Do NOT set el.value. Let the user type.
   } else {
-    // This is for all other fields
+    // This is for all other fields (including the new textarea)
+    // .trim() is fine for textareas too
     let val = el.value.trim();
 
     if (
@@ -302,9 +297,26 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
     ) {
       recalcDurations(found.obj);
     }
-    renderTable(); // Re-render table
+    
+    // Don't re-render if editing title, as it causes the textarea to lose focus
+    if (prop !== 'title') {
+      renderTable(); // Re-render table
+    }
   }
 });
+
+// Separate blur event to handle re-rendering after text edit
+document.getElementById("tableBody").addEventListener("change", (e) => {
+    const el = e.target;
+    const prop = el.dataset.prop;
+    
+    // If a date was changed, the 'input' event already handled it
+    if (["plannedStart", "plannedDue", "actualStart", "actualDue"].includes(prop)) {
+         recalcDurations(findById(el.dataset.id).obj);
+         renderTable();
+    }
+});
+
 
 document.getElementById("tableBody").addEventListener("click", (e) => {
   const btn = e.target;
@@ -336,12 +348,12 @@ document.getElementById("tableBody").addEventListener("click", (e) => {
     if (!group) return;
 
     // Generate new subtask number
-    let subtaskNum = getNextSubtaskNumber(group);
+    let subTaskNum = getNextSubtaskNumber(group);
 
     // Add subtask with default values
     group.subtasks.push({
       id: generateId(),
-      num: subtaskNum,
+      num: subTaskNum,
       title: "New Subtask",
       owner: "",
       progress: 0,
