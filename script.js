@@ -13,13 +13,14 @@ let data = [
     actualDue: "03/20/23",
     actualDuration: 1,
     delay: 0,
+    isCollapsed: false, // **** NEW ****
     subtasks: [
       {
         id: generateId(),
         num: "1.1",
         title: "Capture all the verticals and tasks in the project plan",
         owner: "Rohit",
-        progress: 50, // Changed for demo
+        progress: 50,
         plannedStart: "06/07/23",
         plannedDue: "06/07/23",
         plannedDuration: 1,
@@ -33,7 +34,7 @@ let data = [
         num: "1.2",
         title: "Assign due dates for all A4 tasks",
         owner: "Rohit",
-        progress: 50, // Changed for demo
+        progress: 50,
         plannedStart: "06/07/23",
         plannedDue: "06/07/23",
         plannedDuration: 1,
@@ -57,6 +58,7 @@ let data = [
     actualDue: "06/22/23",
     actualDuration: 8,
     delay: 0,
+    isCollapsed: false, // **** NEW ****
     subtasks: [],
   },
 ];
@@ -111,12 +113,11 @@ function recalcDurations(item) {
 }
 
 // Render one row: for project group or task
-// level = 0 for group, 1 for subtask, 2 for deeper subtasks (not used here but reserved)
+// level = 0 for group, 1 for subtask
 function renderRow(item, level = 0, parentIndex = null) {
   const tr = document.createElement("tr");
   tr.dataset.id = item.id;
   tr.classList.add(level === 0 ? "task-group" : "subtask");
-  if (level > 1) tr.classList.add("subsubtask");
 
   const indentStyle =
     level === 0
@@ -127,21 +128,27 @@ function renderRow(item, level = 0, parentIndex = null) {
 
   const delayClass = item.delay > 0 ? "delay-positive" : "delay-zero";
 
-  // Use progress value for text, but cap the visual bar at 100%
   const progressPercent = Number(item.progress) || 0;
   const barWidth = Math.min(progressPercent, 100);
 
-  // **** CHANGE: Check if this is a group with subtasks ****
+  // Check if this is a group with subtasks
   const isGroupWithTasks =
     level === 0 && item.subtasks && item.subtasks.length > 0;
   const progressDisabled = isGroupWithTasks ? "disabled" : "";
 
   tr.innerHTML = `
-      <td><input class="text-input" value="${
+      <td>
+        ${
+          level === 0 && item.subtasks && item.subtasks.length > 0
+            ? `<button class="toggle-btn" data-id="${item.id}">${item.isCollapsed ? '+' : '-'}</button>`
+            : level === 0 ? `<span style="display: inline-block; width: 23px; margin-right: 5px;"></span>` : ''
+        }
+        <input class="text-input" value="${
         item.num
-      }" style="width: 80px; font-weight:bold;" data-prop="num" data-id="${
+      }" style="width: ${level === 0 ? '50px' : '80px'}; font-weight:bold;" data-prop="num" data-id="${
     item.id
-  }" /></td>
+  }" />
+      </td>
       
       <td><textarea class="text-input" style="${indentStyle}" data-prop="title" data-id="${
     item.id
@@ -199,7 +206,7 @@ function renderTable() {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
 
-  // **** CHANGE: Recalculate all group progress *before* rendering ****
+  // Recalculate all group progress *before* rendering
   data.forEach((group) => {
     if (group.subtasks && group.subtasks.length > 0) {
       let total = 0;
@@ -209,15 +216,14 @@ function renderTable() {
       group.progress = Math.round(total / group.subtasks.length);
     }
   });
-  // **** END OF CHANGE ****
 
   data.forEach((group) => {
     recalcDurations(group);
     // Render group row
     tbody.appendChild(renderRow(group, 0));
 
-    // Render subtasks
-    if (group.subtasks) {
+    // **** CHANGED: Check isCollapsed flag before rendering subtasks ****
+    if (group.subtasks && !group.isCollapsed) {
       group.subtasks.forEach((task) => {
         recalcDurations(task);
         tbody.appendChild(renderRow(task, 1, group.id));
@@ -240,7 +246,7 @@ function findById(id) {
   return null;
 }
 
-// **** CHANGE: Updated logic to average groups ****
+// Updated logic to average groups
 function updateOverallProgress() {
   if (data.length === 0) {
     document.getElementById("overallProgressFill").style.width = "0%";
@@ -254,15 +260,12 @@ function updateOverallProgress() {
   });
 
   const overallPercent = Math.round(totalProgress / data.length);
-
-  // Cap the visual bar at 100%
   const barWidth = Math.min(overallPercent, 100);
 
   document.getElementById("overallProgressFill").style.width = barWidth + "%";
   document.getElementById("overallProgressLabel").textContent =
     overallPercent + "%";
 }
-// **** END OF CHANGE ****
 
 // Event delegation for edits and buttons
 document.getElementById("tableBody").addEventListener("input", (e) => {
@@ -274,10 +277,10 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
   if (!found) return;
 
   if (prop === "progress") {
-    let val = el.value; // Get raw value
+    let val = el.value;
     let numVal = Number(val);
-    if (val === "") numVal = 0; // Treat empty string as 0
-    if (isNaN(numVal)) numVal = found.obj[prop] || 0; // Keep old value if invalid
+    if (val === "") numVal = 0;
+    if (isNaN(numVal)) numVal = found.obj[prop] || 0;
     if (numVal < 0) numVal = 0;
 
     found.obj[prop] = numVal; // Update data
@@ -290,7 +293,7 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
       barEl.closest(".progress-bar").title = numVal + "%";
     }
 
-    // **** CHANGE: Recalculate parent group if this is a subtask ****
+    // Recalculate parent group if this is a subtask
     if (found.parent) {
       let group = found.parent;
       if (group.subtasks.length > 0) {
@@ -316,7 +319,6 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
         }
       }
     }
-    // **** END OF CHANGE ****
 
     updateOverallProgress(); // Update overall bar
   } else {
@@ -351,7 +353,6 @@ document.getElementById("tableBody").addEventListener("change", (e) => {
   const el = e.target;
   const prop = el.dataset.prop;
 
-  // If a date was changed, the 'input' event already handled it
   if (
     ["plannedStart", "plannedDue", "actualStart", "actualDue"].includes(prop)
   ) {
@@ -362,7 +363,16 @@ document.getElementById("tableBody").addEventListener("change", (e) => {
 
 document.getElementById("tableBody").addEventListener("click", (e) => {
   const btn = e.target;
-  if (btn.classList.contains("delete-btn")) {
+
+  // **** NEW: Toggle button handler ****
+  if (btn.classList.contains("toggle-btn")) {
+    const id = btn.dataset.id;
+    const group = data.find((g) => g.id === id);
+    if (group) {
+      group.isCollapsed = !group.isCollapsed;
+      renderTable();
+    }
+  } else if (btn.classList.contains("delete-btn")) {
     const id = btn.dataset.id;
     const found = findById(id);
     if (!found) return;
@@ -429,6 +439,7 @@ function addProjectGroup() {
     actualDue: "",
     actualDuration: 0,
     delay: 0,
+    isCollapsed: false, // **** NEW ****
     subtasks: [],
   };
   data.push(newGroup);
