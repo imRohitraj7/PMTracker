@@ -137,7 +137,6 @@ td.progress-cell {
   border-radius: 2px 0 0 2px;
 }
 
-/* This class is no longer used by the script */
 .progress-text {
   font-size: 10px;
   font-weight: bold;
@@ -157,10 +156,12 @@ td.delay-positive {
   background-color: #f8d7da;
 }
 
+/* CHANGE: Added textarea to this main rule */
 input,
-select {
+select,
+textarea {
   font-family: Arial, sans-serif;
-  font-size: 10px; /* CHANGE: Reduced font size */
+  font-size: 10px;
   padding: 2px 4px;
   border: 1px solid #aaa;
   border-radius: 3px;
@@ -169,18 +170,27 @@ select {
 }
 
 input.number-input {
-  width: 50px; /* CHANGE: Reduced width */
+  width: 50px;
   text-align: center;
-  flex-shrink: 0; /* Prevents shrinking in flex container */
+  flex-shrink: 0;
 }
 
-input.text-input {
+/* CHANGE: Added textarea.text-input to this rule */
+input.text-input,
+textarea.text-input {
   width: 98%;
-  white-space: normal;
+  white-space: normal; /* This will now apply to the textarea */
+}
+
+/* CHANGE: Added new rule for textarea specifics */
+textarea.text-input {
+  resize: vertical; /* Allow user to resize it vertically */
+  min-height: 18px; /* Match the height of other inputs */
+  vertical-align: middle;
 }
 
 button {
-  font-size: 10px; /* CHANGE: Reduced font size */
+  font-size: 10px;
   padding: 2px 6px;
   margin: 0 2px;
   cursor: pointer;
