@@ -37,11 +37,11 @@ h1 {
   display: inline-block;
 }
 
-/* **** CHANGED: Renamed class to break cache **** */
+/* Progress bar */
 .overall-bar-fill {
   height: 100%;
   background-color: #2da52a;
-  width: 0%; /* Start at 0% */
+  width: 0%;
   transition: width 0.5s ease;
 }
 
@@ -104,12 +104,6 @@ tbody tr.subtask td:nth-child(2) {
   white-space: normal;
 }
 
-tbody tr.subsubtask td:first-child,
-tbody tr.subsubtask td:nth-child(2) {
-  padding-left: 35px;
-  white-space: normal;
-}
-
 td.progress-cell {
   padding: 2px 3px;
   white-space: nowrap;
@@ -134,16 +128,6 @@ td.progress-cell {
   width: 0%;
   transition: width 0.4s ease;
   border-radius: 2px 0 0 2px;
-}
-
-.progress-text {
-  font-size: 10px;
-  font-weight: bold;
-  color: #000;
-  display: inline-block;
-  min-width: 25px;
-  vertical-align: middle;
-  user-select: none;
 }
 
 /* Delay coloring */
@@ -171,12 +155,6 @@ input.number-input {
   width: 50px;
   text-align: center;
   flex-shrink: 0;
-}
-
-input.text-input,
-textarea.text-input {
-  width: 98%;
-  white-space: normal;
 }
 
 textarea.text-input {
