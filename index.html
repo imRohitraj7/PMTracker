@@ -27,26 +27,41 @@
         border-bottom: 2px solid #eee;
         padding-bottom: 10px;
       }
+      /* **** NEW STYLES for the form **** */
       .create-project {
-        display: flex;
-        gap: 10px;
+        display: grid;
+        gap: 15px;
         margin-bottom: 20px;
       }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+      #new-project-sorter,
       #new-project-name {
-        flex-grow: 1;
         padding: 10px;
         font-size: 16px;
         border: 1px solid #ccc;
         border-radius: 4px;
+        width: 100%;
+        box-sizing: border-box; /* Fixes padding issue */
       }
+      /* **** END NEW STYLES **** */
+
       #create-project-btn {
-        padding: 10px 20px;
+        padding: 12px 20px;
         font-size: 16px;
         background-color: #007bff;
         color: white;
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        justify-self: start; /* Aligns button to the left */
       }
       #create-project-btn:hover {
         background-color: #0056b3;
@@ -65,11 +80,17 @@
         margin-bottom: 10px;
         background: #f9f9f9;
       }
-      #project-list a {
+      /* **** UPDATED STYLE to show Sorter Type **** */
+      #project-list .project-info a {
         font-size: 18px;
         text-decoration: none;
         color: #0056b3;
         font-weight: bold;
+        display: block; /* Makes it stack */
+      }
+      #project-list .project-info span {
+        font-size: 14px;
+        color: #555;
       }
       .delete-project-btn {
         padding: 5px 10px;
@@ -87,14 +108,30 @@
 
       <h2>Create New Project</h2>
       <div class="create-project">
-        <input
-          type="text"
-          id="new-project-name"
-          placeholder="Enter project name (e.g., NIDO Project Manager)"
-        />
-        <button id="create-project-btn">Create</button>
-      </div>
+        <div class="form-group">
+          <label for="new-project-sorter">1. Select Sorter Type</label>
+          <select id="new-project-sorter">
+            <option value="">-- Please select a sorter --</option>
+            <option value="NIDO 2:8 Sorter">NIDO 2:8 Sorter</option>
+            <option value="NIDO 1:4 Sorter">NIDO 1:4 Sorter</option>
+            <option value="NIDO Arm Sorter">NIDO Arm Sorter</option>
+            <option value="Falcon Arm Sorter">Falcon Arm Sorter</option>
+            <option value="Falcon CBS Sorter">Falcon CBS Sorter</option>
+            <option value="Falcon Bag Sorter">Falcon Bag Sorter</option>
+          </select>
+        </div>
 
+        <div class="form-group">
+          <label for="new-project-name">2. Enter Project Name</label>
+          <input
+            type="text"
+            id="new-project-name"
+            placeholder="e.g., Client ABC Implementation"
+          />
+        </div>
+
+        <button id="create-project-btn">Create Project</button>
+      </div>
       <h2>Existing Projects</h2>
       <ul id="project-list">
         </ul>
@@ -104,6 +141,7 @@
       const projectListEl = document.getElementById("project-list");
       const createBtn = document.getElementById("create-project-btn");
       const newProjectNameEl = document.getElementById("new-project-name");
+      const newProjectSorterEl = document.getElementById("new-project-sorter"); // Get the dropdown
 
       // Load all projects from storage
       function loadProjects() {
@@ -115,8 +153,12 @@
         }
         projects.forEach((project) => {
           const li = document.createElement("li");
+          // **** UPDATED: Show Project Name and Sorter Type ****
           li.innerHTML = `
-            <a href="project.html?id=${project.id}">${project.name}</a>
+            <div class="project-info">
+              <a href="project.html?id=${project.id}">${project.name}</a>
+              <span>${project.sorterType}</span>
+            </div>
             <button class="delete-project-btn" data-id="${project.id}">Delete</button>
           `;
           projectListEl.appendChild(li);
@@ -125,7 +167,15 @@
 
       // Create a new project
       createBtn.addEventListener("click", () => {
+        // **** UPDATED: Get data from both fields ****
+        const sorterType = newProjectSorterEl.value;
         const projectName = newProjectNameEl.value.trim();
+
+        // **** UPDATED: Validate both fields ****
+        if (sorterType === "") {
+          alert("Please select a sorter type.");
+          return;
+        }
         if (projectName === "") {
           alert("Please enter a project name.");
           return;
@@ -133,9 +183,12 @@
 
         const projects =
           JSON.parse(localStorage.getItem("NidoProjectList")) || [];
+        
+        // **** UPDATED: New project object structure ****
         const newProject = {
           id: "pid_" + new Date().getTime(), // Unique ID
           name: projectName,
+          sorterType: sorterType, // Add the sorter type
         };
 
         projects.push(newProject);
