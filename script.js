@@ -19,7 +19,7 @@ let data = [
         num: "1.1",
         title: "Capture all the verticals and tasks in the project plan",
         owner: "Rohit",
-        progress: 100,
+        progress: 50, // Changed for demo
         plannedStart: "06/07/23",
         plannedDue: "06/07/23",
         plannedDuration: 1,
@@ -33,7 +33,7 @@ let data = [
         num: "1.2",
         title: "Assign due dates for all A4 tasks",
         owner: "Rohit",
-        progress: 100,
+        progress: 50, // Changed for demo
         plannedStart: "06/07/23",
         plannedDue: "06/07/23",
         plannedDuration: 1,
@@ -131,6 +131,11 @@ function renderRow(item, level = 0, parentIndex = null) {
   const progressPercent = Number(item.progress) || 0;
   const barWidth = Math.min(progressPercent, 100);
 
+  // **** CHANGE: Check if this is a group with subtasks ****
+  const isGroupWithTasks =
+    level === 0 && item.subtasks && item.subtasks.length > 0;
+  const progressDisabled = isGroupWithTasks ? "disabled" : "";
+
   tr.innerHTML = `
       <td><input class="text-input" value="${
         item.num
@@ -149,7 +154,7 @@ function renderRow(item, level = 0, parentIndex = null) {
       <td class="progress-cell">
         <input type="number" class="number-input" value="${progressPercent}" data-prop="progress" data-id="${
     item.id
-  }" />
+  }" ${progressDisabled} />
         <div class="progress-bar" aria-hidden="true" title="${progressPercent}%">
           <div class="progress-bar-fill" style="width: ${barWidth}%;"></div>
         </div>
@@ -194,6 +199,18 @@ function renderTable() {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
 
+  // **** CHANGE: Recalculate all group progress *before* rendering ****
+  data.forEach((group) => {
+    if (group.subtasks && group.subtasks.length > 0) {
+      let total = 0;
+      group.subtasks.forEach((task) => {
+        total += Number(task.progress);
+      });
+      group.progress = Math.round(total / group.subtasks.length);
+    }
+  });
+  // **** END OF CHANGE ****
+
   data.forEach((group) => {
     recalcDurations(group);
     // Render group row
@@ -223,24 +240,20 @@ function findById(id) {
   return null;
 }
 
-// Update overall progress (average of all tasks)
+// **** CHANGE: Updated logic to average groups ****
 function updateOverallProgress() {
+  if (data.length === 0) {
+    document.getElementById("overallProgressFill").style.width = "0%";
+    document.getElementById("overallProgressLabel").textContent = "0%";
+    return;
+  }
+
   let totalProgress = 0;
-  let count = 0;
   data.forEach((group) => {
-    // Only count subtasks for overall progress
-    if (group.subtasks && group.subtasks.length > 0) {
-      group.subtasks.forEach((task) => {
-        totalProgress += Number(task.progress);
-        count++;
-      });
-    } else {
-      // If a group has no subtasks, count the group itself
-      totalProgress += Number(group.progress);
-      count++;
-    }
+    totalProgress += Number(group.progress);
   });
-  const overallPercent = count ? Math.round(totalProgress / count) : 0;
+
+  const overallPercent = Math.round(totalProgress / data.length);
 
   // Cap the visual bar at 100%
   const barWidth = Math.min(overallPercent, 100);
@@ -249,6 +262,7 @@ function updateOverallProgress() {
   document.getElementById("overallProgressLabel").textContent =
     overallPercent + "%";
 }
+// **** END OF CHANGE ****
 
 // Event delegation for edits and buttons
 document.getElementById("tableBody").addEventListener("input", (e) => {
@@ -275,10 +289,38 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
       barEl.style.width = barWidth + "%";
       barEl.closest(".progress-bar").title = numVal + "%";
     }
-    updateOverallProgress();
+
+    // **** CHANGE: Recalculate parent group if this is a subtask ****
+    if (found.parent) {
+      let group = found.parent;
+      if (group.subtasks.length > 0) {
+        let total = 0;
+        group.subtasks.forEach((task) => {
+          total += Number(task.progress);
+        });
+        let avg = Math.round(total / group.subtasks.length);
+        group.progress = avg; // Update data model
+
+        // Update the parent group's UI
+        const groupRow = document.querySelector(`tr[data-id="${group.id}"]`);
+        if (groupRow) {
+          const groupInput = groupRow.querySelector(
+            '.number-input[data-prop="progress"]'
+          );
+          const groupBarFill = groupRow.querySelector(".progress-bar-fill");
+          const groupBar = groupRow.querySelector(".progress-bar");
+
+          if (groupInput) groupInput.value = avg;
+          if (groupBar) groupBar.title = avg + "%";
+          if (groupBarFill) groupBarFill.style.width = Math.min(avg, 100) + "%";
+        }
+      }
+    }
+    // **** END OF CHANGE ****
+
+    updateOverallProgress(); // Update overall bar
   } else {
-    // This is for all other fields (including the new textarea)
-    // .trim() is fine for textareas too
+    // This is for all other fields
     let val = el.value.trim();
 
     if (
@@ -297,9 +339,8 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
     ) {
       recalcDurations(found.obj);
     }
-    
-    // Don't re-render if editing title, as it causes the textarea to lose focus
-    if (prop !== 'title') {
+
+    if (prop !== "title") {
       renderTable(); // Re-render table
     }
   }
@@ -307,16 +348,17 @@ document.getElementById("tableBody").addEventListener("input", (e) => {
 
 // Separate blur event to handle re-rendering after text edit
 document.getElementById("tableBody").addEventListener("change", (e) => {
-    const el = e.target;
-    const prop = el.dataset.prop;
-    
-    // If a date was changed, the 'input' event already handled it
-    if (["plannedStart", "plannedDue", "actualStart", "actualDue"].includes(prop)) {
-         recalcDurations(findById(el.dataset.id).obj);
-         renderTable();
-    }
-});
+  const el = e.target;
+  const prop = el.dataset.prop;
 
+  // If a date was changed, the 'input' event already handled it
+  if (
+    ["plannedStart", "plannedDue", "actualStart", "actualDue"].includes(prop)
+  ) {
+    recalcDurations(findById(el.dataset.id).obj);
+    renderTable();
+  }
+});
 
 document.getElementById("tableBody").addEventListener("click", (e) => {
   const btn = e.target;
